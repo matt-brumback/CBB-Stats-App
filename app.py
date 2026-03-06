@@ -5,10 +5,12 @@ import requests
 from bs4 import BeautifulSoup
 import numpy as np
 import time
+import re
+import unicodedata
 from team_colors import (
     get_team_colors, get_all_teams, local_search_teams,
-    get_team_display_name, get_team_full_name,
-    TEAM_COLORS, DEFAULT_PRIMARY, DEFAULT_SECONDARY,
+    get_team_display_name, get_team_full_name, get_team_conference,
+    TEAM_COLORS, TEAM_ESPN_IDS, DEFAULT_PRIMARY, DEFAULT_SECONDARY,
 )
 
 st.set_page_config(
@@ -369,6 +371,13 @@ def apply_theme(primary: str, secondary: str):
     )
 
 
+# ── Search helpers ─────────────────────────────────────────────────────────────
+
+def _normalize_query(q: str) -> str:
+    """Strip accents/diacritics so searches like 'Muhl' find 'Mühl' on SR."""
+    return unicodedata.normalize("NFD", q).encode("ascii", "ignore").decode("ascii")
+
+
 # ── HTTP session ───────────────────────────────────────────────────────────────
 
 def _make_session() -> requests.Session:
@@ -389,7 +398,7 @@ def search_players(query: str) -> list:
     session = _make_session()
     resp = session.get(
         f"{BASE_URL}/cbb/search/search.fcgi",
-        params={"search": query},
+        params={"search": _normalize_query(query)},
         timeout=10,
     )
     soup = BeautifulSoup(resp.text, "lxml")
@@ -534,7 +543,7 @@ def search_teams(query: str) -> list:
         session = _make_session()
         resp = session.get(
             f"{BASE_URL}/cbb/search/search.fcgi",
-            params={"search": query},
+            params={"search": _normalize_query(query)},
             timeout=10,
         )
         soup = BeautifulSoup(resp.text, "lxml")
@@ -959,6 +968,59 @@ def _draw_charts(df, stat_groups, selected, primary, secondary,
                 col.caption(f"No data for {label}")
 
 
+# ── Logo helper ───────────────────────────────────────────────────────────────
+
+@st.cache_data(ttl=86400, show_spinner=False)
+def _check_logo(team_id: str) -> str | None:
+    """Return first working logo URL for a team. Tries ESPN CDN first, SR second. Cached 24h."""
+    candidates = []
+    espn_id = TEAM_ESPN_IDS.get(team_id)
+    if espn_id:
+        candidates.append(f"https://a.espncdn.com/i/teamlogos/ncaa/500/{espn_id}.png")
+    candidates.append(
+        f"https://www.sports-reference.com/req/202106291/images/schools/logos/{team_id}.png"
+    )
+    for url in candidates:
+        try:
+            r = requests.head(url, timeout=3, headers=HEADERS)
+            if r.status_code == 200:
+                return url
+        except Exception:
+            continue
+    return None
+
+
+# ── Conference standing helper ─────────────────────────────────────────────────
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def get_conf_standing(team_id: str, year: int) -> str | None:
+    """Scrape e.g. 'Big Ten · 5th' from SR team season page. Falls back to dict."""
+    session = _make_session()
+    try:
+        resp = session.get(
+            f"{BASE_URL}/cbb/schools/{team_id}/men/{year}.html",
+            timeout=10,
+        )
+        soup = BeautifulSoup(resp.text, "lxml")
+        meta = soup.find("div", id="meta")
+        if not meta:
+            return get_team_conference(team_id)
+        for a in meta.find_all("a", href=True):
+            if "/cbb/conferences/" not in a["href"]:
+                continue
+            conf_name = a.get_text(strip=True)
+            parent_p = a.find_parent("p")
+            if parent_p:
+                text = parent_p.get_text(" ", strip=True)
+                m = re.search(r"(\d+(?:st|nd|rd|th))\s+(?:in|of)", text, re.I)
+                if m:
+                    return f"{conf_name} · {m.group(1)}"
+            return conf_name
+        return get_team_conference(team_id)
+    except Exception:
+        return get_team_conference(team_id)
+
+
 # ── Main app ───────────────────────────────────────────────────────────────────
 
 def main():
@@ -1202,28 +1264,41 @@ def main():
         wins   = int((df["diff"] > 0).sum()) if "diff" in df.columns else "—"
         losses = int((df["diff"] < 0).sum()) if "diff" in df.columns else "—"
         r2, g2, b2 = _hex_to_rgb(primary)
-        # Full team name (e.g. "Kansas Jayhawks") and logo
+        # Logo + full team name — use st.columns to avoid Streamlit's markdown
+        # parser treating 4-space-indented nested HTML as a code block
         full_team_name = get_team_full_name(team_id)
-        logo_url = f"https://www.sports-reference.com/req/202106291/images/schools/logos/{team_id}.png"
+        logo_url = _check_logo(team_id)
+        conf_str = get_conf_standing(team_id, selected_year)
+
+        if logo_url:
+            c_logo, c_title = st.columns([1, 11], vertical_alignment="center")
+            with c_logo:
+                st.image(logo_url, width=64)
+            with c_title:
+                st.markdown(
+                    f"<h1 style='margin:0;font-size:2.1rem;line-height:1.15'>{full_team_name}</h1>",
+                    unsafe_allow_html=True,
+                )
+        else:
+            st.markdown(
+                f"<h1 style='margin-bottom:4px;font-size:2.1rem'>{full_team_name}</h1>",
+                unsafe_allow_html=True,
+            )
+
+        # Badge row — flat single-line f-string; no indented nested divs
+        conf_badge = (
+            f'<span style="background:#f3f4f6;color:#374151;padding:4px 12px;'
+            f'border-radius:20px;font-size:0.8rem;font-weight:600">{conf_str}</span>'
+            if conf_str else ""
+        )
         st.markdown(
-            f"""<div style="margin-bottom:0.2rem">
-            <div style="display:flex;align-items:center;gap:16px;margin-bottom:6px">
-              <img src="{logo_url}"
-                   style="height:64px;width:auto;object-fit:contain;flex-shrink:0"
-                   onerror="this.style.display='none'">
-              <h1 style="margin:0;font-size:2.1rem;line-height:1.15">{full_team_name}</h1>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px">
-              <span style="background:rgba({r2},{g2},{b2},0.12);color:{primary};
-                           padding:4px 12px;border-radius:20px;font-size:0.8rem;
-                           font-weight:700;letter-spacing:0.03em">{season_str}</span>
-              <span style="background:#f0fdf4;color:#16a34a;padding:4px 12px;
-                           border-radius:20px;font-size:0.8rem;font-weight:700">{wins}W</span>
-              <span style="background:#fef2f2;color:#dc2626;padding:4px 12px;
-                           border-radius:20px;font-size:0.8rem;font-weight:700">{losses}L</span>
-              <span style="color:#6b7280;font-size:0.88rem;font-weight:500">
-                {len(df)} games</span>
-            </div></div>""",
+            f'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">'
+            f'<span style="background:rgba({r2},{g2},{b2},0.12);color:{primary};padding:4px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;letter-spacing:0.03em">{season_str}</span>'
+            f'<span style="background:#f0fdf4;color:#16a34a;padding:4px 12px;border-radius:20px;font-size:0.8rem;font-weight:700">{wins}W</span>'
+            f'<span style="background:#fef2f2;color:#dc2626;padding:4px 12px;border-radius:20px;font-size:0.8rem;font-weight:700">{losses}L</span>'
+            f'<span style="color:#6b7280;font-size:0.88rem;font-weight:500">{len(df)} games</span>'
+            f'{conf_badge}'
+            f'</div>',
             unsafe_allow_html=True,
         )
 

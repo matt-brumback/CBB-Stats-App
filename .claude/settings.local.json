@@ -9,7 +9,10 @@
       "Bash(python3 -c \":*)",
       "Bash(git -C \"/Users/mattbrumback/Documents/Claude Stuff/Projects/CBB Stats\" add app.py team_colors.py)",
       "Bash(git -C \"/Users/mattbrumback/Documents/Claude Stuff/Projects/CBB Stats\" commit -m \"Polish UI, fix chart spacing, add full team shooting stats via box scores\")",
-      "Bash(git -C \"/Users/mattbrumback/Documents/Claude Stuff/Projects/CBB Stats\" push)"
+      "Bash(git -C \"/Users/mattbrumback/Documents/Claude Stuff/Projects/CBB Stats\" push)",
+      "Bash(python3 -m streamlit --version)",
+      "Bash(python3 -c \"import sys; print\\(sys.executable\\)\")",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }
