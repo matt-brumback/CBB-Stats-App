@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 /tmp/debug_cbb.py)",
+      "Bash(/tmp/debug_seasons.py:*)",
+      "Bash(python3 /tmp/debug_seasons.py)",
+      "Bash(/tmp/debug_seasons2.py:*)",
+      "Bash(python3 /tmp/debug_seasons2.py)"
+    ]
+  }
+}
