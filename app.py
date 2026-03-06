@@ -956,6 +956,8 @@ def _draw_charts(df, stat_groups, selected, primary, secondary,
         st.info("Select at least one stat in the sidebar.")
         return
 
+    st.caption("🔥 trending better than season avg · ⚠️ trending worse · based on last 5 games")
+
     for i in range(0, len(active), 2):
         pair = active[i: i + 2]
         cols = st.columns(len(pair))
@@ -1160,23 +1162,33 @@ def main():
             st.title("College Basketball Stats")
             st.markdown(
                 f"""
-                Search for any college basketball **player** in the sidebar and pick a season.
-
-                **Each chart shows:**
-                - Bars colored by team palette — full color = **better** than season avg, faded = below
-                - **Blue/secondary line** — 5-game rolling trend
-                - **Orange dotted line** — season average reference
-
-                **Data source:** [Sports-Reference.com / CBB](https://www.sports-reference.com/cbb)
+                Welcome to **CBB Stats** — game-by-game college basketball stats powered by
+                [Sports-Reference.com](https://www.sports-reference.com/cbb).
 
                 ---
-                **Sites worth exploring for design inspiration:**
-                - [EvanMiya CBB Analytics](https://evanmiya.com) — college hoops advanced metrics
-                - [Cleaning the Glass](https://cleaningtheglass.com) — efficiency-focused basketball analytics
-                - [Stathead](https://stathead.com/basketball) — sports-reference's analytics layer
-                - [Hoopsalytics](https://hoopsalytics.com) — timeline & goal-based basketball viz
-                - [CourtSketch / NBAVisuals](https://nbavisuals.com) — modern shot chart + player viz
-                """
+
+                **Getting started**
+
+                Use the sidebar to switch between **Player** and **Team** mode, search by name,
+                and select a season. Stats load automatically.
+
+                ---
+
+                **Reading the charts**
+                - Each **bar** represents one game — full team color = above season avg, faded = below
+                - The **colored line** is a 5-game rolling average (trend)
+                - The **orange dotted line** is the season average for reference
+                - 🔥 in a chart title = trending better recently · ⚠️ = trending worse
+
+                ---
+
+                **Player mode** shows per-game stats: points, shooting percentages, assists,
+                rebounds, and more. Toggle stats on/off in the sidebar.
+
+                **Team mode** shows game-by-game results by default. Enable **Full Stats**
+                in the sidebar to load complete box score data for every game (first load takes
+                a minute or two; cached after that).
+"""
             )
             return
 
@@ -1229,11 +1241,33 @@ def main():
             st.title("College Basketball Stats")
             st.markdown(
                 """
-                Search for any college basketball **team** in the sidebar and pick a season.
+                Welcome to **CBB Stats** — game-by-game college basketball stats powered by
+                [Sports-Reference.com](https://www.sports-reference.com/cbb).
 
-                The dashboard shows **game-by-game scoring results** — points scored, points allowed,
-                and point differential — plotted as a time series with season average and 5-game rolling trend.
-                """
+                ---
+
+                **Getting started**
+
+                Use the sidebar to switch between **Player** and **Team** mode, search by name,
+                and select a season. Stats load automatically.
+
+                ---
+
+                **Reading the charts**
+                - Each **bar** represents one game — full team color = above season avg, faded = below
+                - The **colored line** is a 5-game rolling average (trend)
+                - The **orange dotted line** is the season average for reference
+                - 🔥 in a chart title = trending better recently · ⚠️ = trending worse
+
+                ---
+
+                **Player mode** shows per-game stats: points, shooting percentages, assists,
+                rebounds, and more. Toggle stats on/off in the sidebar.
+
+                **Team mode** shows game-by-game results by default. Enable **Full Stats**
+                in the sidebar to load complete box score data for every game (first load takes
+                a minute or two; cached after that).
+"""
             )
             return
 
