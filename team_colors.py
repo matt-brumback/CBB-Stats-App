@@ -3,116 +3,117 @@ College basketball team colors, keyed by Sports-Reference.com school ID.
 
 primary   = main brand color (used for bars, accents, borders)
 secondary = alternate/accent color (used for rolling-average line)
-name      = human-readable display name
+name      = human-readable display name (city/school name only)
+nickname  = team nickname / mascot (used to build full name like "Kansas Jayhawks")
 """
 
 TEAM_COLORS = {
 
     # ── ACC ───────────────────────────────────────────────────────────────────
-    "boston-college":        {"primary": "#98002E", "secondary": "#C4B7A6", "name": "Boston College"},
-    "clemson":               {"primary": "#F56600", "secondary": "#522D80", "name": "Clemson"},
-    "duke":                  {"primary": "#003087", "secondary": "#CDA323", "name": "Duke"},
-    "florida-state":         {"primary": "#782F40", "secondary": "#CEB888", "name": "Florida State"},
-    "georgia-tech":          {"primary": "#003057", "secondary": "#B3A369", "name": "Georgia Tech"},
-    "louisville":            {"primary": "#AD0000", "secondary": "#000000", "name": "Louisville"},
-    "miami-fl":              {"primary": "#005030", "secondary": "#F47321", "name": "Miami (FL)"},
-    "north-carolina-state":  {"primary": "#CC0000", "secondary": "#000000", "name": "NC State"},
-    "north-carolina":        {"primary": "#7BAFD4", "secondary": "#13294B", "name": "North Carolina"},
-    "notre-dame":            {"primary": "#0C2340", "secondary": "#C99700", "name": "Notre Dame"},
-    "pittsburgh":            {"primary": "#003594", "secondary": "#FFB81C", "name": "Pittsburgh"},
-    "syracuse":              {"primary": "#F76900", "secondary": "#002147", "name": "Syracuse"},
-    "virginia":              {"primary": "#F84C1E", "secondary": "#232D4B", "name": "Virginia"},
-    "virginia-tech":         {"primary": "#630031", "secondary": "#CF4420", "name": "Virginia Tech"},
-    "wake-forest":           {"primary": "#9E7E38", "secondary": "#000000", "name": "Wake Forest"},
-    "california":            {"primary": "#003262", "secondary": "#FDB515", "name": "California"},
-    "stanford":              {"primary": "#8C1515", "secondary": "#2D2D2D", "name": "Stanford"},
-    "washington-state":      {"primary": "#981E32", "secondary": "#5E6A71", "name": "Washington State"},
+    "boston-college":        {"primary": "#98002E", "secondary": "#C4B7A6", "name": "Boston College",  "nickname": "Eagles"},
+    "clemson":               {"primary": "#F56600", "secondary": "#522D80", "name": "Clemson",          "nickname": "Tigers"},
+    "duke":                  {"primary": "#003087", "secondary": "#CDA323", "name": "Duke",             "nickname": "Blue Devils"},
+    "florida-state":         {"primary": "#782F40", "secondary": "#CEB888", "name": "Florida State",   "nickname": "Seminoles"},
+    "georgia-tech":          {"primary": "#003057", "secondary": "#B3A369", "name": "Georgia Tech",    "nickname": "Yellow Jackets"},
+    "louisville":            {"primary": "#AD0000", "secondary": "#000000", "name": "Louisville",       "nickname": "Cardinals"},
+    "miami-fl":              {"primary": "#005030", "secondary": "#F47321", "name": "Miami (FL)",       "nickname": "Hurricanes"},
+    "north-carolina-state":  {"primary": "#CC0000", "secondary": "#000000", "name": "NC State",         "nickname": "Wolfpack"},
+    "north-carolina":        {"primary": "#7BAFD4", "secondary": "#13294B", "name": "North Carolina",  "nickname": "Tar Heels"},
+    "notre-dame":            {"primary": "#0C2340", "secondary": "#C99700", "name": "Notre Dame",       "nickname": "Fighting Irish"},
+    "pittsburgh":            {"primary": "#003594", "secondary": "#FFB81C", "name": "Pittsburgh",       "nickname": "Panthers"},
+    "syracuse":              {"primary": "#F76900", "secondary": "#002147", "name": "Syracuse",         "nickname": "Orange"},
+    "virginia":              {"primary": "#F84C1E", "secondary": "#232D4B", "name": "Virginia",         "nickname": "Cavaliers"},
+    "virginia-tech":         {"primary": "#630031", "secondary": "#CF4420", "name": "Virginia Tech",   "nickname": "Hokies"},
+    "wake-forest":           {"primary": "#9E7E38", "secondary": "#000000", "name": "Wake Forest",     "nickname": "Demon Deacons"},
+    "california":            {"primary": "#003262", "secondary": "#FDB515", "name": "California",      "nickname": "Golden Bears"},
+    "stanford":              {"primary": "#8C1515", "secondary": "#2D2D2D", "name": "Stanford",         "nickname": "Cardinal"},
+    "washington-state":      {"primary": "#981E32", "secondary": "#5E6A71", "name": "Washington State","nickname": "Cougars"},
 
     # ── Big Ten ───────────────────────────────────────────────────────────────
-    "illinois":              {"primary": "#E84A27", "secondary": "#13294B", "name": "Illinois"},
-    "indiana":               {"primary": "#990000", "secondary": "#DFBF60", "name": "Indiana"},
-    "iowa":                  {"primary": "#FFCD00", "secondary": "#000000", "name": "Iowa"},
-    "maryland":              {"primary": "#E03A3E", "secondary": "#FFD520", "name": "Maryland"},
-    "michigan":              {"primary": "#00274C", "secondary": "#FFCB05", "name": "Michigan"},
-    "michigan-state":        {"primary": "#18453B", "secondary": "#FFFFFF", "name": "Michigan State"},
-    "minnesota":             {"primary": "#7A0019", "secondary": "#FFCC33", "name": "Minnesota"},
-    "nebraska":              {"primary": "#E41C38", "secondary": "#F5F1E7", "name": "Nebraska"},
-    "northwestern":          {"primary": "#4E2A84", "secondary": "#FFFFFF", "name": "Northwestern"},
-    "ohio-state":            {"primary": "#BB0000", "secondary": "#666666", "name": "Ohio State"},
-    "penn-state":            {"primary": "#1E407C", "secondary": "#FFFFFF", "name": "Penn State"},
-    "purdue":                {"primary": "#CEB888", "secondary": "#000000", "name": "Purdue"},
-    "rutgers":               {"primary": "#CC0033", "secondary": "#5F6A72", "name": "Rutgers"},
-    "wisconsin":             {"primary": "#C5050C", "secondary": "#FFFFFF", "name": "Wisconsin"},
-    "ucla":                  {"primary": "#2D68C4", "secondary": "#F2A900", "name": "UCLA"},
-    "usc":                   {"primary": "#990000", "secondary": "#FFC72C", "name": "USC"},
-    "washington":            {"primary": "#4B2E83", "secondary": "#B7A57A", "name": "Washington"},
-    "oregon":                {"primary": "#154733", "secondary": "#FEE123", "name": "Oregon"},
-    "oregon-state":          {"primary": "#DC4405", "secondary": "#000000", "name": "Oregon State"},
+    "illinois":              {"primary": "#E84A27", "secondary": "#13294B", "name": "Illinois",         "nickname": "Fighting Illini"},
+    "indiana":               {"primary": "#990000", "secondary": "#DFBF60", "name": "Indiana",          "nickname": "Hoosiers"},
+    "iowa":                  {"primary": "#FFCD00", "secondary": "#000000", "name": "Iowa",             "nickname": "Hawkeyes"},
+    "maryland":              {"primary": "#E03A3E", "secondary": "#FFD520", "name": "Maryland",         "nickname": "Terrapins"},
+    "michigan":              {"primary": "#00274C", "secondary": "#FFCB05", "name": "Michigan",         "nickname": "Wolverines"},
+    "michigan-state":        {"primary": "#18453B", "secondary": "#FFFFFF", "name": "Michigan State",  "nickname": "Spartans"},
+    "minnesota":             {"primary": "#7A0019", "secondary": "#FFCC33", "name": "Minnesota",        "nickname": "Golden Gophers"},
+    "nebraska":              {"primary": "#E41C38", "secondary": "#F5F1E7", "name": "Nebraska",         "nickname": "Cornhuskers"},
+    "northwestern":          {"primary": "#4E2A84", "secondary": "#FFFFFF", "name": "Northwestern",     "nickname": "Wildcats"},
+    "ohio-state":            {"primary": "#BB0000", "secondary": "#666666", "name": "Ohio State",       "nickname": "Buckeyes"},
+    "penn-state":            {"primary": "#1E407C", "secondary": "#FFFFFF", "name": "Penn State",       "nickname": "Nittany Lions"},
+    "purdue":                {"primary": "#CEB888", "secondary": "#000000", "name": "Purdue",           "nickname": "Boilermakers"},
+    "rutgers":               {"primary": "#CC0033", "secondary": "#5F6A72", "name": "Rutgers",          "nickname": "Scarlet Knights"},
+    "wisconsin":             {"primary": "#C5050C", "secondary": "#FFFFFF", "name": "Wisconsin",        "nickname": "Badgers"},
+    "ucla":                  {"primary": "#2D68C4", "secondary": "#F2A900", "name": "UCLA",             "nickname": "Bruins"},
+    "usc":                   {"primary": "#990000", "secondary": "#FFC72C", "name": "USC",              "nickname": "Trojans"},
+    "washington":            {"primary": "#4B2E83", "secondary": "#B7A57A", "name": "Washington",       "nickname": "Huskies"},
+    "oregon":                {"primary": "#154733", "secondary": "#FEE123", "name": "Oregon",           "nickname": "Ducks"},
+    "oregon-state":          {"primary": "#DC4405", "secondary": "#000000", "name": "Oregon State",    "nickname": "Beavers"},
 
     # ── Big 12 ────────────────────────────────────────────────────────────────
-    "arizona":               {"primary": "#AB0520", "secondary": "#0C234B", "name": "Arizona"},
-    "arizona-state":         {"primary": "#8C1D40", "secondary": "#FFC627", "name": "Arizona State"},
-    "baylor":                {"primary": "#154734", "secondary": "#FFB81C", "name": "Baylor"},
-    "brigham-young":         {"primary": "#002E5D", "secondary": "#FFFFFF", "name": "BYU"},
-    "cincinnati":            {"primary": "#E00122", "secondary": "#000000", "name": "Cincinnati"},
-    "colorado":              {"primary": "#CFB87C", "secondary": "#000000", "name": "Colorado"},
-    "iowa-state":            {"primary": "#C8102E", "secondary": "#F1BE48", "name": "Iowa State"},
-    "kansas":                {"primary": "#0051A5", "secondary": "#E8000D", "name": "Kansas"},
-    "kansas-state":          {"primary": "#512888", "secondary": "#D1A827", "name": "Kansas State"},
-    "oklahoma":              {"primary": "#841617", "secondary": "#FDF9D8", "name": "Oklahoma"},
-    "oklahoma-state":        {"primary": "#FF6600", "secondary": "#000000", "name": "Oklahoma State"},
-    "texas-christian":       {"primary": "#4D1979", "secondary": "#A3A3A3", "name": "TCU"},
-    "texas":                 {"primary": "#BF5700", "secondary": "#FFFFFF", "name": "Texas"},
-    "texas-tech":            {"primary": "#CC0000", "secondary": "#000000", "name": "Texas Tech"},
-    "central-florida":       {"primary": "#BA9B37", "secondary": "#000000", "name": "UCF"},
-    "utah":                  {"primary": "#BE0000", "secondary": "#000000", "name": "Utah"},
-    "west-virginia":         {"primary": "#002855", "secondary": "#EAAA00", "name": "West Virginia"},
+    "arizona":               {"primary": "#AB0520", "secondary": "#0C234B", "name": "Arizona",          "nickname": "Wildcats"},
+    "arizona-state":         {"primary": "#8C1D40", "secondary": "#FFC627", "name": "Arizona State",   "nickname": "Sun Devils"},
+    "baylor":                {"primary": "#154734", "secondary": "#FFB81C", "name": "Baylor",           "nickname": "Bears"},
+    "brigham-young":         {"primary": "#002E5D", "secondary": "#FFFFFF", "name": "BYU",              "nickname": "Cougars"},
+    "cincinnati":            {"primary": "#E00122", "secondary": "#000000", "name": "Cincinnati",       "nickname": "Bearcats"},
+    "colorado":              {"primary": "#CFB87C", "secondary": "#000000", "name": "Colorado",         "nickname": "Buffaloes"},
+    "iowa-state":            {"primary": "#C8102E", "secondary": "#F1BE48", "name": "Iowa State",      "nickname": "Cyclones"},
+    "kansas":                {"primary": "#0051A5", "secondary": "#E8000D", "name": "Kansas",           "nickname": "Jayhawks"},
+    "kansas-state":          {"primary": "#512888", "secondary": "#D1A827", "name": "Kansas State",    "nickname": "Wildcats"},
+    "oklahoma":              {"primary": "#841617", "secondary": "#FDF9D8", "name": "Oklahoma",         "nickname": "Sooners"},
+    "oklahoma-state":        {"primary": "#FF6600", "secondary": "#000000", "name": "Oklahoma State",  "nickname": "Cowboys"},
+    "texas-christian":       {"primary": "#4D1979", "secondary": "#A3A3A3", "name": "TCU",              "nickname": "Horned Frogs"},
+    "texas":                 {"primary": "#BF5700", "secondary": "#FFFFFF", "name": "Texas",            "nickname": "Longhorns"},
+    "texas-tech":            {"primary": "#CC0000", "secondary": "#000000", "name": "Texas Tech",      "nickname": "Red Raiders"},
+    "central-florida":       {"primary": "#BA9B37", "secondary": "#000000", "name": "UCF",              "nickname": "Knights"},
+    "utah":                  {"primary": "#BE0000", "secondary": "#000000", "name": "Utah",             "nickname": "Utes"},
+    "west-virginia":         {"primary": "#002855", "secondary": "#EAAA00", "name": "West Virginia",   "nickname": "Mountaineers"},
 
     # ── SEC ───────────────────────────────────────────────────────────────────
-    "alabama":               {"primary": "#9E1B32", "secondary": "#828A8F", "name": "Alabama"},
-    "arkansas":              {"primary": "#9D2235", "secondary": "#000000", "name": "Arkansas"},
-    "auburn":                {"primary": "#E87722", "secondary": "#03244D", "name": "Auburn"},
-    "florida":               {"primary": "#0021A5", "secondary": "#FA4616", "name": "Florida"},
-    "georgia":               {"primary": "#BA0C2F", "secondary": "#000000", "name": "Georgia"},
-    "kentucky":              {"primary": "#0033A0", "secondary": "#FFFFFF", "name": "Kentucky"},
-    "lsu":                   {"primary": "#461D7C", "secondary": "#FDD023", "name": "LSU"},
-    "mississippi-state":     {"primary": "#660000", "secondary": "#FFFFFF", "name": "Mississippi State"},
-    "mississippi":           {"primary": "#CE1126", "secondary": "#14213D", "name": "Ole Miss"},
-    "missouri":              {"primary": "#F1B82D", "secondary": "#000000", "name": "Missouri"},
-    "south-carolina":        {"primary": "#73000A", "secondary": "#000000", "name": "South Carolina"},
-    "tennessee":             {"primary": "#FF8200", "secondary": "#FFFFFF", "name": "Tennessee"},
-    "texas-am":              {"primary": "#500000", "secondary": "#FFFFFF", "name": "Texas A&M"},
-    "vanderbilt":            {"primary": "#866D4B", "secondary": "#000000", "name": "Vanderbilt"},
+    "alabama":               {"primary": "#9E1B32", "secondary": "#828A8F", "name": "Alabama",          "nickname": "Crimson Tide"},
+    "arkansas":              {"primary": "#9D2235", "secondary": "#000000", "name": "Arkansas",         "nickname": "Razorbacks"},
+    "auburn":                {"primary": "#E87722", "secondary": "#03244D", "name": "Auburn",           "nickname": "Tigers"},
+    "florida":               {"primary": "#0021A5", "secondary": "#FA4616", "name": "Florida",          "nickname": "Gators"},
+    "georgia":               {"primary": "#BA0C2F", "secondary": "#000000", "name": "Georgia",          "nickname": "Bulldogs"},
+    "kentucky":              {"primary": "#0033A0", "secondary": "#FFFFFF", "name": "Kentucky",         "nickname": "Wildcats"},
+    "lsu":                   {"primary": "#461D7C", "secondary": "#FDD023", "name": "LSU",              "nickname": "Tigers"},
+    "mississippi-state":     {"primary": "#660000", "secondary": "#FFFFFF", "name": "Mississippi State","nickname": "Bulldogs"},
+    "mississippi":           {"primary": "#CE1126", "secondary": "#14213D", "name": "Ole Miss",         "nickname": "Rebels"},
+    "missouri":              {"primary": "#F1B82D", "secondary": "#000000", "name": "Missouri",         "nickname": "Tigers"},
+    "south-carolina":        {"primary": "#73000A", "secondary": "#000000", "name": "South Carolina",  "nickname": "Gamecocks"},
+    "tennessee":             {"primary": "#FF8200", "secondary": "#FFFFFF", "name": "Tennessee",        "nickname": "Volunteers"},
+    "texas-am":              {"primary": "#500000", "secondary": "#FFFFFF", "name": "Texas A&M",        "nickname": "Aggies"},
+    "vanderbilt":            {"primary": "#866D4B", "secondary": "#000000", "name": "Vanderbilt",       "nickname": "Commodores"},
 
     # ── Big East ──────────────────────────────────────────────────────────────
-    "butler":                {"primary": "#13294B", "secondary": "#807B78", "name": "Butler"},
-    "connecticut":           {"primary": "#000E2F", "secondary": "#A2AAAD", "name": "UConn"},
-    "creighton":             {"primary": "#005CA9", "secondary": "#FFFFFF", "name": "Creighton"},
-    "depaul":                {"primary": "#00539F", "secondary": "#D22630", "name": "DePaul"},
-    "georgetown":            {"primary": "#041E42", "secondary": "#73777B", "name": "Georgetown"},
-    "marquette":             {"primary": "#003366", "secondary": "#FFCC00", "name": "Marquette"},
-    "providence":            {"primary": "#321E6D", "secondary": "#FFFFFF", "name": "Providence"},
-    "seton-hall":            {"primary": "#004B8D", "secondary": "#FFFFFF", "name": "Seton Hall"},
-    "st-johns-ny":           {"primary": "#CC0000", "secondary": "#FFFFFF", "name": "St. John's"},
-    "villanova":             {"primary": "#003189", "secondary": "#13B5EA", "name": "Villanova"},
-    "xavier":                {"primary": "#0D5257", "secondary": "#B9975B", "name": "Xavier"},
+    "butler":                {"primary": "#13294B", "secondary": "#807B78", "name": "Butler",           "nickname": "Bulldogs"},
+    "connecticut":           {"primary": "#000E2F", "secondary": "#A2AAAD", "name": "UConn",            "nickname": "Huskies"},
+    "creighton":             {"primary": "#005CA9", "secondary": "#FFFFFF", "name": "Creighton",        "nickname": "Bluejays"},
+    "depaul":                {"primary": "#00539F", "secondary": "#D22630", "name": "DePaul",           "nickname": "Blue Demons"},
+    "georgetown":            {"primary": "#041E42", "secondary": "#73777B", "name": "Georgetown",       "nickname": "Hoyas"},
+    "marquette":             {"primary": "#003366", "secondary": "#FFCC00", "name": "Marquette",        "nickname": "Golden Eagles"},
+    "providence":            {"primary": "#321E6D", "secondary": "#FFFFFF", "name": "Providence",       "nickname": "Friars"},
+    "seton-hall":            {"primary": "#004B8D", "secondary": "#FFFFFF", "name": "Seton Hall",       "nickname": "Pirates"},
+    "st-johns-ny":           {"primary": "#CC0000", "secondary": "#FFFFFF", "name": "St. John's",       "nickname": "Red Storm"},
+    "villanova":             {"primary": "#003189", "secondary": "#13B5EA", "name": "Villanova",        "nickname": "Wildcats"},
+    "xavier":                {"primary": "#0D5257", "secondary": "#B9975B", "name": "Xavier",           "nickname": "Musketeers"},
 
     # ── Other Notable Programs ─────────────────────────────────────────────────
-    "dayton":                {"primary": "#CC0000", "secondary": "#004B8D", "name": "Dayton"},
-    "davidson":              {"primary": "#CC0000", "secondary": "#000000", "name": "Davidson"},
-    "drake":                 {"primary": "#004B8D", "secondary": "#FFFFFF", "name": "Drake"},
-    "gonzaga":               {"primary": "#002060", "secondary": "#CF0A2C", "name": "Gonzaga"},
-    "loyola-il":             {"primary": "#822433", "secondary": "#DBC98E", "name": "Loyola Chicago"},
-    "memphis":               {"primary": "#003087", "secondary": "#898D8D", "name": "Memphis"},
-    "murray-state":          {"primary": "#002144", "secondary": "#9D9795", "name": "Murray State"},
-    "nevada":                {"primary": "#003366", "secondary": "#807B77", "name": "Nevada"},
-    "new-mexico":            {"primary": "#BA0C2F", "secondary": "#888B8D", "name": "New Mexico"},
-    "saint-louis":           {"primary": "#003DA5", "secondary": "#FFFFFF", "name": "Saint Louis"},
-    "saint-marys-ca":        {"primary": "#0F3B7E", "secondary": "#BB9753", "name": "Saint Mary's"},
-    "san-diego-state":       {"primary": "#C41230", "secondary": "#000000", "name": "San Diego State"},
-    "utah-state":            {"primary": "#00263A", "secondary": "#8A8D8F", "name": "Utah State"},
-    "vcu":                   {"primary": "#000000", "secondary": "#F9A01B", "name": "VCU"},
-    "wichita-state":         {"primary": "#000000", "secondary": "#FFD100", "name": "Wichita State"},
+    "dayton":                {"primary": "#CC0000", "secondary": "#004B8D", "name": "Dayton",           "nickname": "Flyers"},
+    "davidson":              {"primary": "#CC0000", "secondary": "#000000", "name": "Davidson",         "nickname": "Wildcats"},
+    "drake":                 {"primary": "#004B8D", "secondary": "#FFFFFF", "name": "Drake",            "nickname": "Bulldogs"},
+    "gonzaga":               {"primary": "#002060", "secondary": "#CF0A2C", "name": "Gonzaga",          "nickname": "Bulldogs"},
+    "loyola-il":             {"primary": "#822433", "secondary": "#DBC98E", "name": "Loyola Chicago",  "nickname": "Ramblers"},
+    "memphis":               {"primary": "#003087", "secondary": "#898D8D", "name": "Memphis",          "nickname": "Tigers"},
+    "murray-state":          {"primary": "#002144", "secondary": "#9D9795", "name": "Murray State",    "nickname": "Racers"},
+    "nevada":                {"primary": "#003366", "secondary": "#807B77", "name": "Nevada",           "nickname": "Wolf Pack"},
+    "new-mexico":            {"primary": "#BA0C2F", "secondary": "#888B8D", "name": "New Mexico",       "nickname": "Lobos"},
+    "saint-louis":           {"primary": "#003DA5", "secondary": "#FFFFFF", "name": "Saint Louis",     "nickname": "Billikens"},
+    "saint-marys-ca":        {"primary": "#0F3B7E", "secondary": "#BB9753", "name": "Saint Mary's",    "nickname": "Gaels"},
+    "san-diego-state":       {"primary": "#C41230", "secondary": "#000000", "name": "San Diego State", "nickname": "Aztecs"},
+    "utah-state":            {"primary": "#00263A", "secondary": "#8A8D8F", "name": "Utah State",      "nickname": "Aggies"},
+    "vcu":                   {"primary": "#000000", "secondary": "#F9A01B", "name": "VCU",              "nickname": "Rams"},
+    "wichita-state":         {"primary": "#000000", "secondary": "#FFD100", "name": "Wichita State",   "nickname": "Shockers"},
 }
 
 DEFAULT_PRIMARY   = "#2c3e50"
@@ -273,6 +274,23 @@ def get_team_colors(school_id: str) -> tuple[str, str]:
     if team:
         return team["primary"], team["secondary"]
     return DEFAULT_PRIMARY, DEFAULT_SECONDARY
+
+
+def get_team_display_name(school_id: str) -> str:
+    """Return the short display name (e.g. 'Kansas') for a school_id."""
+    team = TEAM_COLORS.get(school_id)
+    return team["name"] if team else school_id.replace("-", " ").title()
+
+
+def get_team_full_name(school_id: str) -> str:
+    """Return the full display name including nickname (e.g. 'Kansas Jayhawks')."""
+    team = TEAM_COLORS.get(school_id)
+    if not team:
+        return school_id.replace("-", " ").title()
+    nickname = team.get("nickname", "")
+    if nickname:
+        return f"{team['name']} {nickname}"
+    return team["name"]
 
 
 def get_all_teams() -> list[tuple[str, str]]:

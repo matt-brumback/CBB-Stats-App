@@ -7,6 +7,7 @@ import numpy as np
 import time
 from team_colors import (
     get_team_colors, get_all_teams, local_search_teams,
+    get_team_display_name, get_team_full_name,
     TEAM_COLORS, DEFAULT_PRIMARY, DEFAULT_SECONDARY,
 )
 
@@ -1126,9 +1127,16 @@ def main():
 
         season_str = f"{selected_year - 1}–{str(selected_year)[-2:]}"
         r2, g2, b2 = _hex_to_rgb(primary)
+        # Build player heading — add "(Team)" suffix if we know the school
+        school_name = get_team_display_name(school_id) if school_id else None
+        player_heading = (
+            f"{player_label} "
+            f"<span style='font-size:1.3rem;font-weight:600;color:#6b7280'>({school_name})</span>"
+            if school_name else player_label
+        )
         st.markdown(
             f"""<div style="margin-bottom:0.2rem">
-            <h1 style="margin-bottom:6px;font-size:2.1rem">{player_label}</h1>
+            <h1 style="margin-bottom:6px;font-size:2.1rem;line-height:1.2">{player_heading}</h1>
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px">
               <span style="background:rgba({r2},{g2},{b2},0.12);color:{primary};
                            padding:4px 12px;border-radius:20px;font-size:0.8rem;
@@ -1194,9 +1202,17 @@ def main():
         wins   = int((df["diff"] > 0).sum()) if "diff" in df.columns else "—"
         losses = int((df["diff"] < 0).sum()) if "diff" in df.columns else "—"
         r2, g2, b2 = _hex_to_rgb(primary)
+        # Full team name (e.g. "Kansas Jayhawks") and logo
+        full_team_name = get_team_full_name(team_id)
+        logo_url = f"https://www.sports-reference.com/req/202106291/images/schools/logos/{team_id}.png"
         st.markdown(
             f"""<div style="margin-bottom:0.2rem">
-            <h1 style="margin-bottom:6px;font-size:2.1rem">{team_label}</h1>
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:6px">
+              <img src="{logo_url}"
+                   style="height:64px;width:auto;object-fit:contain;flex-shrink:0"
+                   onerror="this.style.display='none'">
+              <h1 style="margin:0;font-size:2.1rem;line-height:1.15">{full_team_name}</h1>
+            </div>
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px">
               <span style="background:rgba({r2},{g2},{b2},0.12);color:{primary};
                            padding:4px 12px;border-radius:20px;font-size:0.8rem;
