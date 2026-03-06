@@ -5,7 +5,11 @@
       "Bash(/tmp/debug_seasons.py:*)",
       "Bash(python3 /tmp/debug_seasons.py)",
       "Bash(/tmp/debug_seasons2.py:*)",
-      "Bash(python3 /tmp/debug_seasons2.py)"
+      "Bash(python3 /tmp/debug_seasons2.py)",
+      "Bash(python3 -c \":*)",
+      "Bash(git -C \"/Users/mattbrumback/Documents/Claude Stuff/Projects/CBB Stats\" add app.py team_colors.py)",
+      "Bash(git -C \"/Users/mattbrumback/Documents/Claude Stuff/Projects/CBB Stats\" commit -m \"Polish UI, fix chart spacing, add full team shooting stats via box scores\")",
+      "Bash(git -C \"/Users/mattbrumback/Documents/Claude Stuff/Projects/CBB Stats\" push)"
     ]
   }
 }

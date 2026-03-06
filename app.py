@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 import requests
 from bs4 import BeautifulSoup
 import numpy as np
+import time
 from team_colors import (
     get_team_colors, get_all_teams, local_search_teams,
     TEAM_COLORS, DEFAULT_PRIMARY, DEFAULT_SECONDARY,
@@ -71,7 +72,7 @@ PLAYER_STAT_GROUPS = {
     ],
 }
 
-# Team stat groups (from schedule page)
+# Team stat groups — basic (schedule-only)
 TEAM_STAT_GROUPS = {
     "Game Results": [
         ("pts",     "Points Scored",  False, False),
@@ -80,9 +81,39 @@ TEAM_STAT_GROUPS = {
     ],
 }
 
+# Team stat groups — full (loaded from per-game box scores)
+TEAM_FULL_STAT_GROUPS = {
+    "Game Results": [
+        ("pts",     "Points Scored",  False, False),
+        ("opp_pts", "Points Allowed", False, True),
+        ("diff",    "Point Diff",     False, False),
+    ],
+    "Shooting": [
+        ("fg_pct",  "FG%",  True,  False),
+        ("fg3_pct", "3P%",  True,  False),
+        ("ft_pct",  "FT%",  True,  False),
+        ("efg_pct", "eFG%", True,  False),
+        ("fg3",     "3PM",  False, False),
+        ("fg3a",    "3PA",  False, False),
+    ],
+    "Rebounds": [
+        ("trb",  "Total Reb",  False, False),
+        ("orb",  "Off. Reb",   False, False),
+        ("drb",  "Def. Reb",   False, False),
+    ],
+    "Playmaking & Defense": [
+        ("ast", "Assists",   False, False),
+        ("stl", "Steals",    False, False),
+        ("blk", "Blocks",    False, False),
+        ("tov", "Turnovers", False, True),
+        ("pf",  "Fouls",     False, True),
+    ],
+}
+
 # Default stats checked on load
-PLAYER_DEFAULT_ON = {"pts", "fg_pct", "fg3_pct", "trb", "ast"}
-TEAM_DEFAULT_ON   = {"pts", "opp_pts", "diff"}
+PLAYER_DEFAULT_ON    = {"pts", "fg_pct", "fg3_pct", "trb", "ast"}
+TEAM_DEFAULT_ON      = {"pts", "opp_pts", "diff"}
+TEAM_FULL_DEFAULT_ON = {"pts", "opp_pts", "diff", "fg_pct", "fg3_pct", "trb", "ast"}
 
 # Summary metrics shown across the top
 PLAYER_SUMMARY = [
@@ -98,8 +129,19 @@ PLAYER_SUMMARY = [
 
 TEAM_SUMMARY = [
     ("pts",     "PPG",      False, False),
-    ("opp_pts", "OPP PPG",  False, True),   # lower is better
+    ("opp_pts", "OPP PPG",  False, True),
     ("diff",    "AVG DIFF", False, False),
+]
+
+TEAM_FULL_SUMMARY = [
+    ("pts",     "PPG",   False, False),
+    ("opp_pts", "OPP",   False, True),
+    ("diff",    "DIFF",  False, False),
+    ("fg_pct",  "FG%",   True,  False),
+    ("fg3_pct", "3P%",   True,  False),
+    ("ft_pct",  "FT%",   True,  False),
+    ("trb",     "RPG",   False, False),
+    ("ast",     "APG",   False, False),
 ]
 
 # Columns in the raw game log table
@@ -187,39 +229,138 @@ def apply_theme(primary: str, secondary: str):
     st.markdown(
         f"""
         <style>
-        /* Metric cards */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        /* ── Global typography ── */
+        html, body, [class*="css"], .stApp {{
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        }}
+
+        /* ── Main container padding ── */
+        .main .block-container {{
+            padding-top: 1.8rem !important;
+            padding-bottom: 2rem !important;
+        }}
+
+        /* ── Metric cards ── */
         div[data-testid="metric-container"] {{
             border-left: 4px solid {primary};
-            background: rgba({r},{g},{b},0.05);
-            border-radius: 0 10px 10px 0;
-            padding: 18px 20px !important;
-            margin-bottom: 4px;
+            background: linear-gradient(135deg, rgba({r},{g},{b},0.07) 0%, rgba({r},{g},{b},0.02) 100%);
+            border-radius: 0 12px 12px 0;
+            padding: 14px 18px !important;
+            margin-bottom: 6px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
         }}
-        /* Sidebar accent */
+        div[data-testid="metric-container"]:hover {{
+            transform: translateX(3px);
+            box-shadow: 0 2px 8px rgba({r},{g},{b},0.15);
+        }}
+        /* Metric label — small caps style */
+        div[data-testid="metric-container"] label {{
+            font-size: 0.68rem !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.08em !important;
+            color: #6b7280 !important;
+        }}
+        /* Metric value */
+        div[data-testid="stMetricValue"] > div {{
+            font-size: 1.55rem !important;
+            font-weight: 700 !important;
+            font-variant-numeric: tabular-nums !important;
+            letter-spacing: -0.02em !important;
+            color: #111827 !important;
+        }}
+        /* Metric delta */
+        div[data-testid="stMetricDelta"] svg {{ display: none; }}
+        div[data-testid="stMetricDelta"] > div {{
+            font-size: 0.78rem !important;
+            font-weight: 600 !important;
+        }}
+
+        /* ── Sidebar ── */
         section[data-testid="stSidebar"] > div:first-child {{
-            border-right: 3px solid rgba({r},{g},{b},0.18);
+            border-right: 3px solid rgba({r},{g},{b},0.15);
+            background: #f9fafb;
         }}
-        /* Subheaders */
+        section[data-testid="stSidebar"] h1 {{
+            font-size: 1.2rem !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.02em !important;
+        }}
+        section[data-testid="stSidebar"] .stRadio label {{
+            font-weight: 600 !important;
+            font-size: 0.88rem !important;
+        }}
+        section[data-testid="stSidebar"] .stCheckbox label {{
+            font-size: 0.82rem !important;
+            color: #374151 !important;
+        }}
+        /* Sidebar text input */
+        section[data-testid="stSidebar"] input {{
+            border-radius: 8px !important;
+            font-size: 0.88rem !important;
+            border-color: rgba({r},{g},{b},0.25) !important;
+        }}
+        section[data-testid="stSidebar"] input:focus {{
+            border-color: {primary} !important;
+            box-shadow: 0 0 0 3px rgba({r},{g},{b},0.12) !important;
+        }}
+
+        /* ── Headings ── */
+        h1 {{
+            font-weight: 800 !important;
+            letter-spacing: -0.03em !important;
+            color: #111827 !important;
+            line-height: 1.15 !important;
+        }}
         h2, h3 {{
             color: {primary} !important;
             font-weight: 700 !important;
-            letter-spacing: -0.01em;
+            letter-spacing: -0.01em !important;
         }}
-        /* Dividers */
+
+        /* ── Dividers ── */
         hr {{
-            border-color: rgba({r},{g},{b},0.18) !important;
-            margin: 1.2rem 0 !important;
+            border: none !important;
+            border-top: 1px solid rgba({r},{g},{b},0.15) !important;
+            margin: 1.4rem 0 !important;
         }}
-        /* Main title */
-        h1 {{
-            font-weight: 800 !important;
-            letter-spacing: -0.02em;
-        }}
-        /* Caption text */
+
+        /* ── Caption ── */
         [data-testid="stCaptionContainer"] p {{
-            color: rgba({r},{g},{b},0.75);
-            font-size: 0.8rem;
+            color: #6b7280;
+            font-size: 0.76rem;
             font-weight: 500;
+            letter-spacing: 0.01em;
+        }}
+
+        /* ── Plotly chart wrapper ── */
+        div[data-testid="stPlotlyChart"] > div {{
+            border-radius: 12px !important;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04) !important;
+            overflow: hidden;
+            background: white !important;
+        }}
+
+        /* ── Expanders ── */
+        details summary p {{
+            font-weight: 600 !important;
+            font-size: 0.85rem !important;
+            color: #374151 !important;
+        }}
+
+        /* ── Dataframe ── */
+        div[data-testid="stDataFrame"] {{
+            border-radius: 10px !important;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+        }}
+
+        /* ── Info/warning ── */
+        div[data-testid="stAlert"] {{
+            border-radius: 10px !important;
         }}
         </style>
         """,
@@ -512,6 +653,112 @@ def get_team_schedule(team_id: str, year: int):
     return df
 
 
+@st.cache_data(ttl=86400, show_spinner=False)
+def get_team_game_log(team_id: str, year: int):
+    """Fetch per-game team shooting stats from individual box score pages.
+
+    Scrapes N+1 pages (schedule + one per game played).
+    Results are cached for 24 hrs since historical data doesn't change.
+    Returns a DataFrame with full team box score stats merged with schedule info.
+    """
+    session = _make_session()
+
+    # ── Step 1: pull schedule to get box score URLs ───────────────────────────
+    url = f"{BASE_URL}/cbb/schools/{team_id}/men/{year}-schedule.html"
+    try:
+        resp = session.get(url, timeout=10)
+    except Exception:
+        return None
+    soup = BeautifulSoup(resp.text, "lxml")
+    table = soup.find("table", id="schedule")
+    if not table:
+        return None
+
+    games = []
+    for tr in table.select("tbody tr"):
+        if "thead" in tr.get("class", []):
+            continue
+        date_td = tr.find("td", {"data-stat": "date_game"})
+        if not date_td:
+            continue
+        pts_td = tr.find("td", {"data-stat": "pts"})
+        if not pts_td or not pts_td.get_text(strip=True):
+            continue  # not yet played
+
+        a = date_td.find("a")
+        if not a:
+            continue
+
+        def _cell(stat):
+            td = tr.find("td", {"data-stat": stat})
+            return td.get_text(strip=True) if td else ""
+
+        games.append({
+            "box_url":      a["href"],
+            "date_game":    _cell("date_game"),
+            "opp_name":     _cell("opp_name"),
+            "game_location": _cell("game_location"),
+            "game_result":  _cell("game_result"),
+            "pts":          _cell("pts"),
+            "opp_pts":      _cell("opp_pts"),
+        })
+
+    if not games:
+        return None
+
+    # ── Step 2: fetch each box score ──────────────────────────────────────────
+    table_id = f"box-score-basic-{team_id}"
+    rows = []
+    for game in games:
+        time.sleep(2.5)
+        try:
+            box_resp = session.get(f"{BASE_URL}{game['box_url']}", timeout=10)
+            box_soup = BeautifulSoup(box_resp.text, "lxml")
+            box_table = box_soup.find("table", id=table_id)
+            if not box_table:
+                continue
+            tfoot = box_table.find("tfoot")
+            if not tfoot:
+                continue
+            row = tfoot.find("tr")
+            if not row:
+                continue
+            cells = {
+                td.get("data-stat"): td.get_text(strip=True)
+                for td in row.find_all(["td", "th"])
+                if td.get("data-stat") and td.get("data-stat") != "player"
+            }
+            cells.update(game)
+            rows.append(cells)
+        except Exception:
+            continue
+
+    if not rows:
+        return None
+
+    df = pd.DataFrame(rows)
+
+    count_cols = ["fg", "fga", "fg2", "fg2a", "fg3", "fg3a", "ft", "fta",
+                  "orb", "drb", "trb", "ast", "stl", "blk", "tov", "pf", "pts", "opp_pts"]
+    pct_cols   = ["fg_pct", "fg2_pct", "fg3_pct", "ft_pct"]
+
+    for col in count_cols + pct_cols:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    # Compute derived stats
+    if "fg" in df.columns and "fg3" in df.columns and "fga" in df.columns:
+        df["efg_pct"] = (df["fg"] + 0.5 * df["fg3"]) / df["fga"]
+    if "pts" in df.columns and "opp_pts" in df.columns:
+        df["diff"] = df["pts"] - df["opp_pts"]
+    if "date_game" in df.columns:
+        df["date_game"] = pd.to_datetime(df["date_game"], errors="coerce")
+
+    df = df.dropna(subset=["pts"]).reset_index(drop=True)
+    df["game_num"] = df.index + 1
+    return df
+
+
 # ── Chart builder (shared) ─────────────────────────────────────────────────────
 
 def make_chart(
@@ -602,33 +849,50 @@ def make_chart(
 
     n = len(data)
     fig.update_layout(
-        title=dict(text=chart_title, font=dict(size=13, color="#2c3e50"), x=0, xanchor="left"),
-        height=270,
-        margin=dict(l=10, r=20, t=44, b=30),
-        plot_bgcolor="#fafafa",
+        title=dict(
+            text=chart_title,
+            font=dict(size=13, color="#111827", family="Inter, sans-serif"),
+            x=0, xanchor="left",
+            pad=dict(b=10),
+        ),
+        height=290,
+        margin=dict(l=10, r=20, t=44, b=56),
+        plot_bgcolor="#ffffff",
         paper_bgcolor="#ffffff",
         xaxis=dict(
-            title="Game",
+            title=dict(text="Game", font=dict(size=10, color="#9ca3af")),
             showgrid=False,
             tick0=1,
             dtick=max(1, round(n / 10)),
-            tickfont=dict(size=10),
+            tickfont=dict(size=10, color="#6b7280"),
+            linecolor="#e5e7eb",
+            linewidth=1,
+            showline=True,
         ),
         yaxis=dict(
             tickformat=".0%" if is_pct else None,
-            gridcolor="#ececec",
+            gridcolor="#f3f4f6",
             gridwidth=1,
-            tickfont=dict(size=10),
+            tickfont=dict(size=10, color="#6b7280"),
+            zeroline=False,
         ),
         legend=dict(
             orientation="h",
-            y=1.18,
+            y=-0.22,
             x=0,
-            font=dict(size=10),
+            xanchor="left",
+            font=dict(size=10, color="#6b7280"),
             bgcolor="rgba(0,0,0,0)",
+            itemsizing="constant",
+            traceorder="normal",
         ),
         hovermode="x unified",
-        hoverlabel=dict(bgcolor="white", font_size=12),
+        hoverlabel=dict(
+            bgcolor="white",
+            font_size=12,
+            font_family="Inter, sans-serif",
+            bordercolor="#e5e7eb",
+        ),
     )
     return fig
 
@@ -792,13 +1056,28 @@ def main():
                 school_id = "__default__"
 
             st.divider()
+
+            # Full stats toggle — persisted in session state
+            full_key = f"team_full_{team_id}_{selected_year}" if (team_id and selected_year) else None
+            use_full = st.session_state.get("use_full_team_stats", False)
+
+            if team_id and selected_year:
+                use_full = st.toggle(
+                    "Full team stats",
+                    value=use_full,
+                    key="use_full_team_stats",
+                    help="Loads per-game shooting, rebounding & more from individual box scores. First load takes ~1 min; cached after.",
+                )
+
             st.subheader("Stats to Display")
+            stat_groups_to_use = TEAM_FULL_STAT_GROUPS if use_full else TEAM_STAT_GROUPS
+            defaults_to_use    = TEAM_FULL_DEFAULT_ON   if use_full else TEAM_DEFAULT_ON
             selected_stats = {}
-            for group_name, stats in TEAM_STAT_GROUPS.items():
-                with st.expander(group_name, expanded=True):
+            for group_name, stats in stat_groups_to_use.items():
+                with st.expander(group_name, expanded=(group_name in ("Game Results", "Shooting"))):
                     for key, label, _, _ in stats:
                         selected_stats[key] = st.checkbox(
-                            label, value=(key in TEAM_DEFAULT_ON), key=f"chk_{key}"
+                            label, value=(key in defaults_to_use), key=f"chk_{key}"
                         )
 
     # ── Resolve team colors (auto-detected; no manual picker) ─────────────────
@@ -846,8 +1125,19 @@ def main():
             return
 
         season_str = f"{selected_year - 1}–{str(selected_year)[-2:]}"
-        st.title(f"{player_label}")
-        st.subheader(f"{season_str} season · {len(df)} games played")
+        r2, g2, b2 = _hex_to_rgb(primary)
+        st.markdown(
+            f"""<div style="margin-bottom:0.2rem">
+            <h1 style="margin-bottom:6px;font-size:2.1rem">{player_label}</h1>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px">
+              <span style="background:rgba({r2},{g2},{b2},0.12);color:{primary};
+                           padding:4px 12px;border-radius:20px;font-size:0.8rem;
+                           font-weight:700;letter-spacing:0.03em">{season_str}</span>
+              <span style="color:#6b7280;font-size:0.88rem;font-weight:500">
+                {len(df)} games played</span>
+            </div></div>""",
+            unsafe_allow_html=True,
+        )
 
         _render_summary(df, PLAYER_SUMMARY, primary)
         st.divider()
@@ -877,8 +1167,24 @@ def main():
             )
             return
 
-        with st.spinner(f"Loading {team_label} {selected_year - 1}–{str(selected_year)[-2:]} schedule…"):
-            df = get_team_schedule(team_id, selected_year)
+        use_full = st.session_state.get("use_full_team_stats", False)
+
+        if use_full:
+            n_games_hint = ""
+            with st.spinner(
+                f"Loading full stats for {team_label} {selected_year - 1}–{str(selected_year)[-2:]}… "
+                f"(fetching box scores — first load ~1–2 min, cached after)"
+            ):
+                df = get_team_game_log(team_id, selected_year)
+            date_col, opp_col = "date_game", "opp_name"
+            stat_groups_used  = TEAM_FULL_STAT_GROUPS
+            summary_used      = TEAM_FULL_SUMMARY
+        else:
+            with st.spinner(f"Loading {team_label} {selected_year - 1}–{str(selected_year)[-2:]} schedule…"):
+                df = get_team_schedule(team_id, selected_year)
+            date_col, opp_col = "date_game", "opp_name"
+            stat_groups_used  = TEAM_STAT_GROUPS
+            summary_used      = TEAM_SUMMARY
 
         if df is None or df.empty:
             st.error("No schedule data found for this team and season.")
@@ -887,15 +1193,29 @@ def main():
         season_str = f"{selected_year - 1}–{str(selected_year)[-2:]}"
         wins   = int((df["diff"] > 0).sum()) if "diff" in df.columns else "—"
         losses = int((df["diff"] < 0).sum()) if "diff" in df.columns else "—"
+        r2, g2, b2 = _hex_to_rgb(primary)
+        st.markdown(
+            f"""<div style="margin-bottom:0.2rem">
+            <h1 style="margin-bottom:6px;font-size:2.1rem">{team_label}</h1>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px">
+              <span style="background:rgba({r2},{g2},{b2},0.12);color:{primary};
+                           padding:4px 12px;border-radius:20px;font-size:0.8rem;
+                           font-weight:700;letter-spacing:0.03em">{season_str}</span>
+              <span style="background:#f0fdf4;color:#16a34a;padding:4px 12px;
+                           border-radius:20px;font-size:0.8rem;font-weight:700">{wins}W</span>
+              <span style="background:#fef2f2;color:#dc2626;padding:4px 12px;
+                           border-radius:20px;font-size:0.8rem;font-weight:700">{losses}L</span>
+              <span style="color:#6b7280;font-size:0.88rem;font-weight:500">
+                {len(df)} games</span>
+            </div></div>""",
+            unsafe_allow_html=True,
+        )
 
-        st.title(f"{team_label}")
-        st.subheader(f"{season_str} season · {wins}–{losses} record · {len(df)} games")
-
-        _render_summary(df, TEAM_SUMMARY, primary)
+        _render_summary(df, summary_used, primary)
         st.divider()
 
-        _draw_charts(df, TEAM_STAT_GROUPS, selected_stats, primary, secondary,
-                     date_col="date_game", opp_col="opp_name")
+        _draw_charts(df, stat_groups_used, selected_stats, primary, secondary,
+                     date_col=date_col, opp_col=opp_col)
 
         with st.expander("View full schedule"):
             available = {k: v for k, v in TEAM_DISPLAY_COLS.items() if k in df.columns}
