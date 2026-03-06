@@ -590,21 +590,35 @@ def get_team_seasons(team_id: str) -> list:
     The school index page (/cbb/schools/{id}/men/) contains a table whose rows
     link to individual season pages at /cbb/schools/{id}/men/{YEAR}.html.
     We extract the year from those links.
+
+    Uses the final (redirected) URL's school slug so that teams like LSU
+    (stored as 'louisiana-state' on SR) resolve correctly even if the
+    requested ID differs from SR's canonical slug.
     """
     session = _make_session()
     resp = session.get(f"{BASE_URL}/cbb/schools/{team_id}/men/", timeout=10)
+    if resp.status_code != 200:
+        return []
     soup = BeautifulSoup(resp.text, "lxml")
 
+    # Derive the actual school slug from the final URL (follows any SR redirects)
+    try:
+        actual_id = resp.url.split("/cbb/schools/")[1].split("/")[0]
+    except (IndexError, AttributeError):
+        actual_id = team_id
+
     years = set()
-    pattern = f"/cbb/schools/{team_id}/men/"
-    for a in soup.find_all("a", href=True):
-        href = a["href"]
-        if href.startswith(pattern):
-            # href looks like /cbb/schools/duke/men/2024.html
-            tail = href[len(pattern):]          # "2024.html"
-            yr_str = tail.replace(".html", "").split("-")[0]
-            if yr_str.isdigit() and 1980 <= int(yr_str) <= 2030:
-                years.add(int(yr_str))
+    # Check both the requested id and the actual (post-redirect) id
+    for sid in {team_id, actual_id}:
+        pattern = f"/cbb/schools/{sid}/men/"
+        for a in soup.find_all("a", href=True):
+            href = a["href"]
+            if href.startswith(pattern):
+                # href looks like /cbb/schools/duke/men/2024.html
+                tail = href[len(pattern):]          # "2024.html"
+                yr_str = tail.replace(".html", "").split("-")[0]
+                if yr_str.isdigit() and 1980 <= int(yr_str) <= 2030:
+                    years.add(int(yr_str))
 
     return sorted(years, reverse=True)
 
